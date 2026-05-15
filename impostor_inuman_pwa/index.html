@@ -1,0 +1,459 @@
+<!doctype html>
+<html lang="tl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Impostor Inuman" />
+  <meta name="theme-color" content="#111827" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <title>Impostor Inuman</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255,255,255,.10);
+      --card2: rgba(255,255,255,.14);
+      --text: #ffffff;
+      --muted: rgba(255,255,255,.72);
+      --line: rgba(255,255,255,.18);
+      --accent: #f59e0b;
+      --accent2: #ef4444;
+      --ok: #22c55e;
+      --shadow: 0 24px 80px rgba(0,0,0,.38);
+      --radius: 28px;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(245,158,11,.36), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(239,68,68,.28), transparent 38%),
+        linear-gradient(135deg, #0b1020 0%, #151a35 48%, #090b13 100%);
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .app {
+      min-height: 100svh;
+      padding: max(18px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .shell {
+      width: min(760px, 100%);
+      max-height: calc(100svh - 24px);
+      overflow: auto;
+      background: rgba(255,255,255,.09);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: clamp(20px, 4vw, 38px);
+    }
+    .topbar {
+      display:flex;
+      justify-content:space-between;
+      gap: 12px;
+      align-items:center;
+      margin-bottom: 22px;
+    }
+    .badge {
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.10);
+      padding: 9px 13px;
+      border-radius: 999px;
+      color: var(--muted);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    h1 {
+      font-size: clamp(36px, 7vw, 68px);
+      line-height: .92;
+      letter-spacing: -2px;
+      margin: 0 0 14px;
+    }
+    h2 {
+      font-size: clamp(28px, 5vw, 48px);
+      line-height: 1;
+      letter-spacing: -1px;
+      margin: 0 0 12px;
+    }
+    p { color: var(--muted); line-height: 1.55; font-size: 17px; margin: 0 0 18px; }
+    .grid { display: grid; gap: 14px; }
+    .grid.two { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    @media (max-width: 640px) { .grid.two { grid-template-columns: 1fr; } }
+    label { display: block; color: rgba(255,255,255,.86); font-weight: 700; margin: 0 0 8px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,.12);
+      color: var(--text);
+      padding: 16px 16px;
+      font-size: 18px;
+      outline: none;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    select option { color: #111827; }
+    .btnrow { display:flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+    button {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 0;
+      border-radius: 20px;
+      padding: 17px 22px;
+      min-height: 58px;
+      font-size: 18px;
+      font-weight: 850;
+      color: #111827;
+      background: var(--accent);
+      box-shadow: 0 14px 30px rgba(245,158,11,.26);
+      cursor: pointer;
+      touch-action: manipulation;
+      flex: 1 1 auto;
+    }
+    button.secondary { background: rgba(255,255,255,.14); color: #fff; box-shadow:none; border:1px solid var(--line); }
+    button.danger { background: var(--accent2); color:#fff; box-shadow:0 14px 30px rgba(239,68,68,.24); }
+    button:disabled { opacity: .55; cursor:not-allowed; transform:none; }
+    button:active { transform: scale(.985); }
+    .screen { display: none; animation: fade .18s ease; }
+    .screen.active { display:block; }
+    @keyframes fade { from {opacity:.3; transform: translateY(6px)} to {opacity:1; transform:none} }
+    .card {
+      border: 1px solid var(--line);
+      background: var(--card);
+      border-radius: 24px;
+      padding: 18px;
+      margin-top: 16px;
+    }
+    .rolecard {
+      min-height: 260px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      border-radius: 28px;
+      background: linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.07));
+      border:1px solid var(--line);
+      padding: 28px;
+      margin: 18px 0;
+    }
+    .secret { font-size: clamp(34px, 7vw, 64px); font-weight: 950; letter-spacing: -1.5px; margin: 10px 0; }
+    .small { font-size: 14px; color: rgba(255,255,255,.62); }
+    .progress { height: 10px; border-radius:999px; background: rgba(255,255,255,.12); overflow:hidden; margin: 14px 0; }
+    .bar { height:100%; width:0%; background: var(--accent); transition: width .2s ease; }
+    .pilllist { display:flex; gap:8px; flex-wrap:wrap; margin-top: 10px; }
+    .pill { border:1px solid var(--line); background:rgba(255,255,255,.10); padding:8px 11px; border-radius:999px; color:var(--muted); font-size:13px; }
+    .warning { color: #fde68a; font-weight: 700; }
+    .toast {
+      position: fixed;
+      left: 50%; bottom: max(22px, env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(14px);
+      background: rgba(17,24,39,.94);
+      color: white;
+      border: 1px solid rgba(255,255,255,.18);
+      padding: 12px 16px;
+      border-radius: 999px;
+      opacity: 0;
+      pointer-events:none;
+      transition: .18s ease;
+      z-index: 50;
+      max-width: calc(100vw - 32px);
+      text-align:center;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <main class="shell" role="main">
+      <section id="home" class="screen active">
+        <div class="topbar">
+          <span class="badge">🍻 Pang-inuman</span>
+          <span class="badge">iPad Ready</span>
+        </div>
+        <h1>Impostor<br/>Inuman</h1>
+        <p>Isang party game para sa barkada. Lahat may parehong salita — maliban sa impostor. Magtanungan, maghinalaan, bumoto, at uminom nang responsable.</p>
+        <div class="card">
+          <p><b>Paano laruin:</b> Ipasahan ang iPad. Bawat player titingin sa secret role niya. Pagkatapos, magtanungan kayo nang hindi masyadong halata ang word.</p>
+          <div class="pilllist">
+            <span class="pill">3–12 players</span>
+            <span class="pill">Walang login</span>
+            <span class="pill">Offline-ready</span>
+            <span class="pill">Tagalog UI</span>
+          </div>
+        </div>
+        <div class="btnrow">
+          <button id="goSetup" type="button">Simulan ang Laro</button>
+        </div>
+      </section>
+
+      <section id="setup" class="screen">
+        <h2>Game Setup</h2>
+        <p>Piliin ang dami ng players at impostor. Pwede mong gamitin ang ready-made topics o gumawa ng sarili.</p>
+        <div class="grid two">
+          <div>
+            <label for="players">Bilang ng Players</label>
+            <select id="players">
+              <option value="3">3 Players</option><option value="4">4 Players</option><option value="5" selected>5 Players</option><option value="6">6 Players</option><option value="7">7 Players</option><option value="8">8 Players</option><option value="9">9 Players</option><option value="10">10 Players</option><option value="11">11 Players</option><option value="12">12 Players</option>
+            </select>
+          </div>
+          <div>
+            <label for="impostors">Bilang ng Impostor</label>
+            <select id="impostors">
+              <option value="1" selected>1 Impostor</option><option value="2">2 Impostors</option><option value="3">3 Impostors</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <label for="mode">Topic Mode</label>
+          <select id="mode">
+            <option value="food" selected>Pagkain at Inumin</option>
+            <option value="party">Party at Barkada</option>
+            <option value="travel">Travel at Date</option>
+            <option value="random">Halo-halo</option>
+            <option value="custom">Custom Word</option>
+          </select>
+          <div id="customBox" style="display:none; margin-top:14px;">
+            <label for="customWord">Custom Word para sa normal players</label>
+            <input id="customWord" placeholder="Halimbawa: Mojito" />
+          </div>
+        </div>
+        <div class="btnrow">
+          <button id="startGame" type="button">Gumawa ng Roles</button>
+          <button id="backHome" class="secondary" type="button">Bumalik</button>
+        </div>
+        <p class="small warning" id="setupNote"></p>
+      </section>
+
+      <section id="pass" class="screen">
+        <h2 id="passTitle">Player 1</h2>
+        <p>Ibigay ang iPad sa player na ito. Kapag ready na, pindutin ang button para makita ang secret role.</p>
+        <div class="progress"><div id="progressBar" class="bar"></div></div>
+        <p class="small" id="progressText"></p>
+        <div class="btnrow">
+          <button id="showRole" type="button">Tingnan ang Role</button>
+        </div>
+      </section>
+
+      <section id="reveal" class="screen">
+        <h2 id="revealPlayer">Player</h2>
+        <div class="rolecard">
+          <p class="small">Ang role mo ay:</p>
+          <div id="roleText" class="secret">...</div>
+          <p id="roleHint"></p>
+        </div>
+        <p class="warning">Huwag ipakita sa iba. Pagkatapos, pindutin ang hide at ipasa ang iPad.</p>
+        <div class="btnrow">
+          <button id="hideNext" type="button">Itago at Susunod</button>
+        </div>
+      </section>
+
+      <section id="play" class="screen">
+        <h2>Simulan ang Diskusyon</h2>
+        <p>Lahat nakakita na ng role. Magtanungan kayo, mag-observe, at hulihin kung sino ang impostor.</p>
+        <div class="card">
+          <p><b>Suggested rules:</b></p>
+          <p>1. Bawat player magtatanong sa kahit sino.<br/>2. Bawal sabihin ang exact word.<br/>3. Pagkatapos ng 2–3 rounds, bumoto kung sino ang impostor.<br/>4. Mali ang boto? Ang bumoto sa maling tao, iinom. Tama ang boto? Ang impostor, iinom.</p>
+        </div>
+        <div class="btnrow">
+          <button id="showAnswer" type="button">Ipakita ang Sagot</button>
+          <button id="newRound" class="secondary" type="button">Bagong Round</button>
+        </div>
+      </section>
+
+      <section id="answer" class="screen">
+        <h2>Resulta</h2>
+        <div class="card">
+          <p class="small">Secret word ng normal players:</p>
+          <div id="answerWord" class="secret"></div>
+          <p class="small">Impostor player/s:</p>
+          <h2 id="answerImpostors"></h2>
+        </div>
+        <div class="btnrow">
+          <button id="again" type="button">Laro Ulit</button>
+          <button id="reset" class="danger" type="button">Reset</button>
+        </div>
+      </section>
+    </main>
+  </div>
+  <div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const screens = ['home','setup','pass','reveal','play','answer'];
+  const topics = {
+    food: ['Adobo','Sinigang','Lechon','Halo-halo','Jollibee','Milk Tea','San Miguel','Mojito','Sushi','Pizza','Samgyupsal','Kare-kare'],
+    party: ['Karaoke','Dance Floor','Truth or Dare','Birthday Cake','Afterparty','Group Photo','Bar Hopping','DJ','Shot Glass','Beer Pong'],
+    travel: ['Beach','Hotel','Airport','Passport','Sunset','Road Trip','Spa','Island Hopping','Museum','Dinner Date'],
+    random: ['Netflix','Gym','Coffee','Shopping','Casino','Motorbike','Rainy Day','Selfie','Money','Perfume','Concert','Secret Crush']
+  };
+
+  let state = {
+    players: 5,
+    impostors: 1,
+    word: '',
+    roles: [],
+    current: 0,
+    locked: false
+  };
+
+  function show(id) {
+    screens.forEach(s => $(s).classList.toggle('active', s === id));
+    document.activeElement && document.activeElement.blur && document.activeElement.blur();
+  }
+
+  function toast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function safeTap(id, fn) {
+    const el = $(id);
+    if (!el) return;
+    let last = 0;
+    const handler = function(e){
+      if (e && e.cancelable) e.preventDefault();
+      const now = Date.now();
+      if (now - last < 260) return;
+      last = now;
+      try { fn(e); } catch (err) { toast('May error. Subukan ulit.'); console.error(err); }
+    };
+    el.addEventListener('click', handler, false);
+    el.addEventListener('touchend', handler, {passive:false});
+  }
+
+  function randomItem(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function updateCustomBox() {
+    $('customBox').style.display = $('mode').value === 'custom' ? 'block' : 'none';
+  }
+
+  function startGame() {
+    const players = parseInt($('players').value, 10);
+    let impostors = parseInt($('impostors').value, 10);
+    if (impostors >= players) {
+      impostors = Math.max(1, players - 1);
+      $('impostors').value = String(impostors);
+      toast('In-adjust ang impostor count.');
+    }
+    if (players < 3) return toast('Kailangan at least 3 players.');
+
+    const mode = $('mode').value;
+    let word = '';
+    if (mode === 'custom') {
+      word = $('customWord').value.trim();
+      if (!word) return toast('Maglagay ng custom word.');
+    } else {
+      word = randomItem(topics[mode] || topics.random);
+    }
+
+    const roles = [];
+    for (let i = 0; i < players; i++) roles.push({ player: i + 1, impostor: false, word });
+    shuffle([...Array(players).keys()]).slice(0, impostors).forEach(idx => { roles[idx].impostor = true; });
+
+    state = { players, impostors, word, roles, current: 0, locked: false };
+    openPass();
+  }
+
+  function openPass() {
+    const n = state.current + 1;
+    $('passTitle').textContent = 'Player ' + n;
+    $('progressText').textContent = n + ' / ' + state.players + ' players';
+    $('progressBar').style.width = Math.round((state.current / state.players) * 100) + '%';
+    show('pass');
+  }
+
+  function revealRole() {
+    const role = state.roles[state.current];
+    $('revealPlayer').textContent = 'Player ' + role.player;
+    if (role.impostor) {
+      $('roleText').textContent = 'IMPOSTOR';
+      $('roleHint').textContent = 'Wala kang secret word. Makisabay at huwag mahuli.';
+    } else {
+      $('roleText').textContent = role.word;
+      $('roleHint').textContent = 'Ito ang secret word mo. Huwag sabihin nang direkta.';
+    }
+    show('reveal');
+  }
+
+  function nextRole() {
+    state.current += 1;
+    if (state.current >= state.players) {
+      $('progressBar').style.width = '100%';
+      show('play');
+    } else {
+      openPass();
+    }
+  }
+
+  function showAnswer() {
+    $('answerWord').textContent = state.word || '—';
+    const imp = state.roles.filter(r => r.impostor).map(r => 'Player ' + r.player).join(', ');
+    $('answerImpostors').textContent = imp || '—';
+    show('answer');
+  }
+
+  function resetAll() {
+    state = { players: 5, impostors: 1, word: '', roles: [], current: 0, locked: false };
+    $('players').value = '5';
+    $('impostors').value = '1';
+    $('mode').value = 'food';
+    $('customWord').value = '';
+    updateCustomBox();
+    show('home');
+  }
+
+  function init() {
+    safeTap('goSetup', () => show('setup'));
+    safeTap('backHome', () => show('home'));
+    safeTap('startGame', startGame);
+    safeTap('showRole', revealRole);
+    safeTap('hideNext', nextRole);
+    safeTap('showAnswer', showAnswer);
+    safeTap('newRound', () => show('setup'));
+    safeTap('again', () => show('setup'));
+    safeTap('reset', resetAll);
+    $('mode').addEventListener('change', updateCustomBox, false);
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('./sw.js').catch(function(){ /* local file may block SW */ });
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, false);
+  else init();
+})();
+</script>
+</body>
+</html>
